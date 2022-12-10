@@ -1,6 +1,7 @@
 package hello.domain.dto;
 
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,11 +16,33 @@ public class PostDto {
     @NoArgsConstructor
     @Builder
     public static class SaveRequestDto {
-
-        private Long id;
         private String subject;
         private String content;
         private String writer;
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class UpdateRequestDto {
+        private String subject;
+        private String content;
+        private String writer;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class ResponseDto {
+        private String id;
+        private String subject;
+        private String content;
+        private String writer;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+    }
 }
