@@ -4,6 +4,8 @@ import hello.domain.dto.PostDto;
 import hello.domain.dto.PostDto.ResponseDto;
 import hello.domain.entity.Post;
 import hello.service.PostService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Api(tags = "몽고DB CRUD")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/test")
@@ -26,6 +29,7 @@ public class TestController {
     private final PostService postService;
 
     @PostMapping
+    @ApiOperation("저장")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseDto save(@RequestBody PostDto.SaveRequestDto request) {
 
@@ -33,12 +37,14 @@ public class TestController {
     }
 
     @GetMapping("/{id}")
+    @ApiOperation("단건 조회")
     public ResponseDto find(@PathVariable String id) {
 
         return postService.findById(id).toResponse();
     }
 
     @GetMapping
+    @ApiOperation("리스트 조회")
     public List<ResponseDto> findAll() {
 
         return postService.findAll()
@@ -48,6 +54,7 @@ public class TestController {
     }
 
     @PatchMapping("/{id}")
+    @ApiOperation("수정")
     public ResponseDto update(@PathVariable String id,
                               @RequestBody PostDto.UpdateRequestDto request) {
 
@@ -55,6 +62,7 @@ public class TestController {
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation("삭제")
     public void delete(@PathVariable String id) {
 
         postService.delete(id);
