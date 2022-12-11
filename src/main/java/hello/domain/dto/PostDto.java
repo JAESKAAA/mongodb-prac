@@ -45,4 +45,17 @@ public class PostDto {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
     }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class SearchFilter {
+        private String subject;
+        private String content;
+        private String writer;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+    }
 }

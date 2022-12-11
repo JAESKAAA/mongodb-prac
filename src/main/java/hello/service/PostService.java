@@ -4,14 +4,16 @@ import hello.domain.dto.PostDto;
 import hello.domain.dto.PostDto.UpdateRequestDto;
 import hello.domain.entity.Post;
 import hello.repository.PostRepository;
+import hello.repository.support.PostRepositoryImpl;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository repository;
@@ -38,5 +40,14 @@ public class PostService {
     public void delete(String id) {
         Post post = findById(id);
         repository.delete(post);
+    }
+
+    public long getAllCount() {
+        return repository.countAll();
+    }
+
+    public List<Post> findAllBySubject(String subject) {
+        List<Post> posts = repository.searchPosts(subject);
+        return posts;
     }
 }

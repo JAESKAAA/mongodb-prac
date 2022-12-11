@@ -2,6 +2,7 @@ package hello.controller;
 
 import hello.domain.dto.PostDto;
 import hello.domain.dto.PostDto.ResponseDto;
+import hello.domain.dto.PostDto.SearchFilter;
 import hello.domain.entity.Post;
 import hello.service.PostService;
 import io.swagger.annotations.Api;
@@ -66,5 +67,23 @@ public class TestController {
     public void delete(@PathVariable String id) {
 
         postService.delete(id);
+    }
+
+
+    @GetMapping("/count/all")
+    @ApiOperation("전체 갯수 조회")
+    public Long getCount() {
+
+        return postService.getAllCount();
+    }
+
+    @GetMapping("/subject")
+    @ApiOperation("주제별 전체 쿼리")
+    public List<ResponseDto> getAllBySubject(SearchFilter filter) {
+
+        return postService.findAllBySubject(filter.getSubject())
+            .stream()
+            .map(Post::toResponse)
+            .collect(Collectors.toList());
     }
 }

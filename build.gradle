@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '2.6.1'
     id 'io.spring.dependency-management' version '1.1.0'
+    id "com.ewerk.gradle.plugins.querydsl" version '1.0.10'
 }
 
 group = 'hello'
@@ -20,6 +21,11 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+    //쿼리DSL 적용 시, classPath 관련 이슈가 발생하는데, 드라이버 버전을 낮춰줌으로써 해결
+    implementation 'org.mongodb:mongo-java-driver:3.8.2'
+
+
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
@@ -30,8 +36,34 @@ dependencies {
     //스웨거
     implementation "io.springfox:springfox-boot-starter:3.0.0"
 
+    //QueryDsl - MongoDB버전
+    implementation 'com.querydsl:querydsl-jpa'
+    implementation 'com.querydsl:querydsl-mongodb:5.0.0'
+    implementation 'com.querydsl:querydsl-apt:5.0.0'
+    annotationProcessor 'com.querydsl:querydsl-apt:5.0.0'
+
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+//QueryDsl 설정
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl.springDataMongo = true
+
+querydsl.querydslSourcesDir = querydslDir
+
+sourceSets.main.java.srcDir(querydsl.querydslSourcesDir)
+
+configurations.querydsl.extendsFrom(configurations.compileClasspath)
+
+compileQuerydsl.options.annotationProcessorPath = configurations.querydsl
+
+task deleteQuerydsl(type: Delete) {
+    delete file(querydslDir)
+}
+tasks.withType(JavaCompile) {
+    it.dependsOn('deleteQuerydsl')
 }
