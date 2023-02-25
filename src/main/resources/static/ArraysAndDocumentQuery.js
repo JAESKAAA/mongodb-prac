@@ -84,3 +84,67 @@ db.sales.find(
       customer: 1
     }
 )
+
+//배열 다큐먼트 수정
+
+db.students.updateOne(
+    {_id: 1, grades: 80}, //_id 1번의 80이라는 데이터
+    {$set: {"grades.$": 82}} // 쿼리된 데이터값을 82로 변경
+)
+
+db.students.updateMany(
+    {}, //모든 다큐먼트
+    {$inc : {"grades.$[]" : 10}} // grades 배열을 값을 전부 10씩 증가시킴
+)
+
+//테스트 배열 삽입
+db.students.insertMany([
+      {
+        _id :4,
+        grades : [
+          {grade : 90, mean : 75, std : 8},
+          {grade : 87, mean : 90, std : 6},
+          {grade : 85, mean : 85, std : 8},
+        ]
+      }
+    ]
+)
+
+//필드내 배열의 특정값이 87이상인 데이터만 100으로 변경
+db.students.updateMany(
+    {_id:4},
+    {$set: {"grades.$[element].grade" : 100}}, //아래 필터에 걸린 데이터를 100으로 변경
+    {arrayFilters : [{"element.grade": {$gte: 87}}]} //배열안에 grade라는 필드값이 87이상인 배열 값에만 적용
+)
+
+//카트 데이터 삽입
+db.students.insertOne({
+  _id: 5,
+  cart : ["banana", "apple", "mango"]
+});
+
+//배열에 특정 요소 삽입 (값이 없는 경우만 들어가게 됨)
+db.students.updateOne(
+    {_id:5},
+    {$addToSet: {cart : "beer"}}
+)
+
+
+//배열에서 특정 요소만 제거
+db.students.updateOne(
+    {_id:5},
+    {$pull : {cart : "banana"}}
+)
+
+//pop을 1로주면 가장 뒤에 있는 값을 제거함
+db.students.updateOne(
+    {_id: 5},
+    {$pop : {cart : -1}} // -1의 경우 역순이라 맨 앞의 값을 제거
+)
+
+//push의 경우도 제일 마지막에 값을 추가하는 연산자
+db.students.updateOne(
+    {_id: 5},
+    {$push : {cart : "popcorn"}}
+)
+
