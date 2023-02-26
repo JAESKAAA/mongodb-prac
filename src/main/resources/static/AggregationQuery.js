@@ -81,3 +81,124 @@ db.orders.aggregate([
   }
 ])
 
+
+
+//scores에 타입을 exam, quiz로 묶고, 각각의 평균 스코어값을 출력
+//id값에는 class_id값을 매핑해주기
+db.grades.aggregate([
+  {
+    $unwind : "$scores" //배열로 묶인 데이터를 풀어주는 역할
+  },
+  {
+    $match :{
+      "scores.type" : {$in : ["exam", "quiz"]}
+    }
+  },
+  {
+    $group : {
+      _id: {
+        class_id : "$class_id",
+        type : "$scores.type"
+      },
+      avg_score : {
+        $avg : "$scores.score"
+      }
+    }
+  },
+  {
+    $group: {
+      _id : "$_id.class_id",
+      scores : {
+        $push : {
+          type: "$_id.type",
+          avg_score: "$avg_score"
+        }
+      }
+    }
+  },
+  {
+    $sort : {
+      _id :1
+    }
+  },
+  {
+    $limit : 5
+  }
+])
+
+//상기 쿼리를 임시필드 추가하여 쿼리하는 방법
+db.grades.aggregate([
+  {
+    $addFields : { //임시 필드를 추가해준다.
+      tmp_scores :  {
+        $filter : { //아래 조건의 필터링된 값만 tmp_scores에 넣어준다.
+          input : "$scores",
+          as: "scores_var",
+          cond :{
+            $or: [
+              {$eq : ["$$scores_var.type", 'exam']}, //변수를 사용할때는 루트 연산자($$)사용함
+              {$eq : ["$$scores_var.type", 'quiz']},
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    $unset : ["scores", "student_id"] //불필요한 필드를 제거해준다.
+  },
+  {
+    $unwind: "$tmp_scores"
+  },
+  {
+    $group : {
+      _id : "$class_id",
+      exam_scores : {
+        $push : {
+          $cond : {
+            if : {
+              $eq : ["$tmp_scores.type","exam"]
+            },
+            then: "$tmp_scores.score",
+            else : "$$REMOVE"
+          }
+        }
+      },
+      quiz_scores : {
+        $push : {
+          $cond : {
+            if : {
+              $eq : ["$tmp_scores.type", "quiz"]
+            },
+            then: "$tmp_scores.score",
+            else : "$$REMOVE"
+          }
+        }
+      }
+    }
+  },
+  {
+    $project : {
+      _id:1,
+      scores : {
+        $objectToArray : {
+          exam : {
+            $avg : "$exam_scores"
+          },
+          quiz : {
+            $avg : "$quiz_scores"
+          }
+        }
+      }
+    }
+  },
+  {
+    $sort : {
+      _id: 1
+    }
+  },
+  {
+    $limit : 5
+  }
+])
+
